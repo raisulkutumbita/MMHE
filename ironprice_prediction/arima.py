@@ -1,8 +1,10 @@
 import ast
 import json
+import time
 import pickle
 import numpy as np
 import pandas as pd
+
 from matplotlib import pyplot as plt
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -57,18 +59,18 @@ class ArimaUnivarient(APIView):
             predict, index=test.index, columns=['predictprice'])
         metrics = forecast_accuracy(predictdata.values, test.values)
         predictdata['actual'] = test.values
-        predictdata.index = predictdata.index.astype("str")
+        predictdata['date'] = predictdata.index.astype('str')
+        
+        predicted_data = json.dumps(predictdata[['date', 'predictprice']].values.tolist())
+        actual_data = json.dumps(predictdata[['date', 'actual']].values.tolist())
 
-        predicted_data = json.dumps(predictdata.values.tolist())
-        actual_data = json.dumps(predictdata.values.tolist())
-
-        return Response({'actual_data': actual_data, 'predicted_data': predicted_data, 'mape': metrics.get('mape', 0)})
+        return Response({'actual_data': actual_data, 'predicted_data': predictdata, 'mape': metrics.get('mape', 0)})
 
 
 class ArimaForeCast(APIView):
 
     def get(self, request, *args, **kwargs):
-        n_steps = request.data.get('nsteps', 10)
+        n_steps = self.request.query_params.get('nsteps', 10)
         model = pickle.load(open('arimamodel.sav', 'rb'))
 
         data = read_frame(univarientdata.objects.all())
@@ -81,8 +83,12 @@ class ArimaForeCast(APIView):
         date_index = pd.date_range(start='1/1/2019', periods=n_steps, freq='M')
         data = pd.DataFrame()
         data['prediction'] = arima.predict(n_periods=n_steps)
-        data.index = date_index
+        data['date'] = date_index
+
+        data['date'] = data['date']
+        predicted_data = json.dumps(data.values.tolist(), default=str)
+
         data.index = data.index.astype("str")
-        json = data.to_json()
-        json = ast.literal_eval(json)
-        return Response(json)
+        # jsond = data.to_json()
+        # jsond = ast.literal_eval(jsond)
+        return Response({'predicted_data': predicted_data})

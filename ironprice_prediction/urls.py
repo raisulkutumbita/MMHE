@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import random_rf, datahead, UnivarientDataPreview
 from .arima import ArimaUnivarient, ArimaForeCast
+from .lasso import lasso
+from .VAR import vectormodel, VARforecast
 
 
 urlpatterns = [
@@ -8,5 +10,8 @@ urlpatterns = [
     path('datahead', datahead.as_view(), name='datahead'),
     path('univarientdata', UnivarientDataPreview.as_view(), name='univarient-data'),
     path('arimamodel', ArimaUnivarient.as_view(), name='aimamodel'),
-    path('arimaforecast', ArimaForeCast.as_view(), name='arima-focast')
+    path('arimaforecast', ArimaForeCast.as_view(), name='arima-focast'),
+    path('lasso', lasso.as_view()),
+    path('vectormodel', vectormodel.as_view()),
+    path('varforecast', VARforecast.as_view())
 ]
