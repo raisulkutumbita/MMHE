@@ -61,10 +61,10 @@ class ArimaUnivarient(APIView):
         predictdata['actual'] = test.values
         predictdata['date'] = predictdata.index.astype('str')
         
-        predicted_data = json.dumps(predictdata[['date', 'predictprice']].values.tolist())
-        actual_data = json.dumps(predictdata[['date', 'actual']].values.tolist())
+        actual_data = predictdata[['date', 'actual']].values.tolist()
+        predicted_data = predictdata[['date', 'predictprice']].values.tolist()
 
-        return Response({'actual_data': actual_data, 'predicted_data': predictdata, 'mape': metrics.get('mape', 0)})
+        return Response({'actual_data': actual_data, 'predicted_data': predicted_data, 'mape': metrics.get('mape', 0)})
 
 
 class ArimaForeCast(APIView):
@@ -86,9 +86,7 @@ class ArimaForeCast(APIView):
         data['date'] = date_index
 
         data['date'] = data['date']
-        predicted_data = json.dumps(data.values.tolist(), default=str)
+        predicted_data = data[['date', 'prediction']].values.tolist()
+        print(predicted_data)
 
-        data.index = data.index.astype("str")
-        # jsond = data.to_json()
-        # jsond = ast.literal_eval(jsond)
         return Response({'predicted_data': predicted_data})
