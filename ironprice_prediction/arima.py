@@ -1,19 +1,17 @@
-import ast
 import json
-import time
-import pickle
 import numpy as np
 import pandas as pd
 
-from matplotlib import pyplot as plt
+from datetime import datetime as dat
+from pyramid.arima import auto_arima
+from dateutil import relativedelta
+
+from django_pandas.io import read_frame
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from pyramid.arima import auto_arima
-from sklearn.metrics import r2_score, mean_squared_error
-from datetime import datetime as dat
-from dateutil import relativedelta
+
 from .models import univarientdata
-from django_pandas.io import read_frame
 from .serializers import ArimaSerializer
 
 
@@ -35,8 +33,8 @@ class ArimaUnivarient(APIView):
     serializer_class = ArimaSerializer
 
     def get(self, request, *args, **kwargs):
-        start_date = self.request.query_params.get('startdate', '1990-01-31')
-        end_date = self.request.query_params.get('enddate', '2018-06-30')
+        start_date = self.request.query_params.get('startdate', '1970-01-30')
+        end_date = self.request.query_params.get('enddate', '2018-01-01')
 
         data = read_frame(univarientdata.objects.all())
         data['date'] = pd.to_datetime(data['date'])
@@ -53,25 +51,23 @@ class ArimaUnivarient(APIView):
                            seasonal=True, m=12)
         predict = arima.predict(n_periods=test.shape[0])
 
-        filename = 'arimamodel.sav'
-        pickle.dump(arima, open(filename, 'wb'))
         predictdata = pd.DataFrame(
             predict, index=test.index, columns=['predictprice'])
         metrics = forecast_accuracy(predictdata.values, test.values)
+
         predictdata['actual'] = test.values
         predictdata['date'] = predictdata.index.astype('str')
-        
+
         actual_data = predictdata[['date', 'actual']].values.tolist()
         predicted_data = predictdata[['date', 'predictprice']].values.tolist()
 
         return Response({'actual_data': actual_data, 'predicted_data': predicted_data, 'mape': metrics.get('mape', 0)})
 
 
-class ArimaForeCast(APIView):
+class ArimaForecast(APIView):
 
     def get(self, request, *args, **kwargs):
-        n_steps = self.request.query_params.get('nsteps', 10)
-        model = pickle.load(open('arimamodel.sav', 'rb'))
+        n_steps = int(self.request.query_params.get('nsteps', 10))
 
         data = read_frame(univarientdata.objects.all())
         data['date'] = pd.to_datetime(data['date'])
@@ -87,6 +83,5 @@ class ArimaForeCast(APIView):
 
         data['date'] = data['date']
         predicted_data = data[['date', 'prediction']].values.tolist()
-        print(predicted_data)
 
         return Response({'predicted_data': predicted_data})
