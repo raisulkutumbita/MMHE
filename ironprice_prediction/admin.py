@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import univarientdata
+from .models import UnivarientData
 
 # Register your models here.
-admin.site.register(univarientdata)
+admin.site.register(UnivarientData)

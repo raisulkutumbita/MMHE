@@ -11,7 +11,7 @@ from django_pandas.io import read_frame
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import univarientdata
+from .models import UnivarientData
 from .serializers import ArimaSerializer
 
 
@@ -36,7 +36,7 @@ class ArimaUnivarient(APIView):
         start_date = self.request.query_params.get('startdate', '1970-01-30')
         end_date = self.request.query_params.get('enddate', '2018-01-01')
 
-        data = read_frame(univarientdata.objects.all())
+        data = read_frame(UnivarientData.objects.all())
         data['date'] = pd.to_datetime(data['date'])
         data = data.drop('id', axis=1)
         data = data.set_index('date')
@@ -69,7 +69,7 @@ class ArimaForecast(APIView):
     def get(self, request, *args, **kwargs):
         n_steps = int(self.request.query_params.get('nsteps', 10))
 
-        data = read_frame(univarientdata.objects.all())
+        data = read_frame(UnivarientData.objects.all())
         data['date'] = pd.to_datetime(data['date'])
         data = data.drop('id', axis=1)
         data = data.set_index('date')

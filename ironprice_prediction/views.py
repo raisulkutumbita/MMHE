@@ -14,7 +14,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
 
-from .models import univarientdata
+from .models import UnivarientData
 
 
 class datahead(APIView):
@@ -34,7 +34,7 @@ class datahead(APIView):
 class UnivarientDataPreview(APIView):
 
     def get(self, request, *args, **kwargs):
-        queryset = univarientdata.objects.values()
+        queryset = UnivarientData.objects.values()
         results = []
         
         for item in queryset:

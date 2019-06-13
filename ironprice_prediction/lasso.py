@@ -1,28 +1,24 @@
+import ast
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
-from matplotlib import pyplot as plt
-from sklearn.pipeline import Pipeline
-from sklearn.linear_model import Lasso
-from sklearn.metrics import r2_score, mean_squared_error
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.model_selection import RandomizedSearchCV
-from sklearn.model_selection import GridSearchCV
-from .models import price_production
-from django_pandas.io import read_frame
-from rest_framework.response import Response
+
 from datetime import datetime as dat
-from rest_framework.views import APIView
-import ast
-from .arima import forecast_accuracy
 from dateutil import relativedelta
+from sklearn.linear_model import Lasso
+
+from django_pandas.io import read_frame
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+from .models import PriceProduction
+from .arima import forecast_accuracy
 
 
-class lasso(APIView):
-    def post(self, request, *args, **kwargs):
+class LassoView(APIView):
+    def get(self, request, *args, **kwargs):
         body_data = request.data
-        data = read_frame(price_production.objects.all())
+        data = read_frame(PriceProduction.objects.all())
         data['date'] = pd.to_datetime(data['date'])
         data = data.drop('id', axis=1)
         data = data.set_index('date')
@@ -58,7 +54,6 @@ class lasso(APIView):
             forecast = pd.DataFrame(columns=['production', 'Price_lag'])
             forecast.loc[0] = n
             forecast.loc[1] = y
-            # forecast['Price_diff']=forecast['Price_lag'].diff(periods=1)
             forecast['rolling_mean_price'] = forecast['Price_lag'].rolling(
                 2, min_periods=1).sum()
             t = reg.predict(forecast[-1:].values)

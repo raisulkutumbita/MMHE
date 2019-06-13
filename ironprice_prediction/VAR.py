@@ -6,14 +6,14 @@ from datetime import datetime as dat
 from rest_framework.views import APIView
 import ast
 from .arima import forecast_accuracy
-from .models import price_production
+from .models import PriceProduction
 from dateutil import relativedelta
 
 
 class vectormodel(APIView):
     def post(self, request, *args, **kwargs):
         body_data = request.data
-        data = read_frame(price_production.objects.all())
+        data = read_frame(PriceProduction.objects.all())
         data['date'] = pd.to_datetime(data['date'])
         data = data.drop('id', axis=1)
         data = data.set_index('date')
@@ -40,7 +40,7 @@ class VARforecast(APIView):
     def post(self, request, *args, **kwargs):
         body_data = request.data
         n_steps = int(body_data['nsteps'])
-        data = read_frame(price_production.objects.all())
+        data = read_frame(PriceProduction.objects.all())
         data['date'] = pd.to_datetime(data['date'])
         data = data.drop('id', axis=1)
         data = data.set_index('date')
