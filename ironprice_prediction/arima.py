@@ -1,20 +1,14 @@
 import json
 import numpy as np
 import pandas as pd
-
 from datetime import datetime as dat
-from pyramid.arima import auto_arima
 from dateutil import relativedelta
-
 from django_pandas.io import read_frame
-
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from .models import UnivarientData
 from .serializers import ArimaSerializer
-
-
+from statsmodels.tsa.arima_model import ARIMA
 def forecast_accuracy(forecast, actual):
     mape = np.mean(np.abs(forecast - actual)/np.abs(actual))  # MAPE
     me = np.mean(forecast - actual)             # ME
@@ -47,10 +41,9 @@ class ArimaUnivarient(APIView):
         nextmonth = enddate + relativedelta.relativedelta(months=1)
 
         train, test = data[startdate:nextmonth], data[nextmonth:]
-        arima = auto_arima(train, error_action='ignore', trace=1,
-                           seasonal=True, m=12)
-        predict = arima.predict(n_periods=test.shape[0])
-
+        model = ARIMA(train, order=(1, 1, 1))
+        model_fit = model.fit(disp=0)
+        predict=model_fit.forecast(test.shape[0])[0].tolist()
         predictdata = pd.DataFrame(
             predict, index=test.index, columns=['predictprice'])
         metrics = forecast_accuracy(predictdata.values, test.values)
@@ -73,12 +66,12 @@ class ArimaForecast(APIView):
         data['date'] = pd.to_datetime(data['date'])
         data = data.drop('id', axis=1)
         data = data.set_index('date')
+        model = ARIMA(data, order=(1, 1, 1))
+        model_fit = model.fit(disp=0)
 
-        arima = auto_arima(data, error_action='ignore', trace=1,
-                           seasonal=True, m=12)
         date_index = pd.date_range(start='1/1/2019', periods=n_steps, freq='M')
         data = pd.DataFrame()
-        data['prediction'] = arima.predict(n_periods=n_steps)
+        data['prediction']  =model_fit.forecast(n_steps)[0].tolist()
         data['date'] = date_index
 
         data['date'] = data['date']
