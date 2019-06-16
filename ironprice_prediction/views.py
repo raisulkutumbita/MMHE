@@ -14,7 +14,20 @@ from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
 
-from .models import UnivarientData
+from .models import UnivarientData, CycloneData
+
+
+class CycloneClimateView(APIView):
+
+    def get(self, request, *args, **kwargs):
+        queryset = CycloneData.objects.values()
+        cyclone = []
+        
+        for item in queryset:
+            arr = [item['date'], item['climate']]
+            cyclone.append(arr)
+
+        return Response({'results': cyclone})
 
 
 class datahead(APIView):

@@ -16,3 +16,11 @@ class PriceProduction(models.Model):
 
     class Meta:
         db_table = "price_production"
+
+
+class CycloneData(models.Model):
+    date = models.DateField()
+    climate = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = "cylone_data"

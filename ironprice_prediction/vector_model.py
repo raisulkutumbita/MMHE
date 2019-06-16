@@ -10,7 +10,7 @@ from .models import PriceProduction
 from dateutil import relativedelta
 
 
-class vectormodel(APIView):
+class VectorModel(APIView):
 
     def get(self, request, *args, **kwargs):
         start_date = self.request.query_params.get('startdate', '1970-01-30')
@@ -42,11 +42,11 @@ class vectormodel(APIView):
         return Response(json)
 
 
-class VARforecast(APIView):
+class VectorForecast(APIView):
 
     def get(self, request, *args, **kwargs):
-        body_data = request.data
-        n_steps = int(body_data['nsteps'])
+        n_steps = int(self.request.query_params.get('nsteps', 10))
+        
         data = read_frame(PriceProduction.objects.all())
         data['date'] = pd.to_datetime(data['date'])
         data = data.drop('id', axis=1)
