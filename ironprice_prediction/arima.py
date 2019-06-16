@@ -1,4 +1,3 @@
-import json
 import numpy as np
 import pandas as pd
 from datetime import datetime as dat
@@ -8,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import UnivarientData
 from .serializers import ArimaSerializer
-from statsmodels.tsa.arima_model import ARIMA
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 def forecast_accuracy(forecast, actual):
     mape = np.mean(np.abs(forecast - actual)/np.abs(actual))  # MAPE
     me = np.mean(forecast - actual)             # ME
@@ -41,9 +40,8 @@ class ArimaUnivarient(APIView):
         nextmonth = enddate + relativedelta.relativedelta(months=1)
 
         train, test = data[startdate:nextmonth], data[nextmonth:]
-        model = ARIMA(train, order=(1, 1, 1))
-        model_fit = model.fit(disp=0)
-        predict=model_fit.forecast(test.shape[0])[0].tolist()
+        arima = SARIMAX(train,order=(1, 0, 2),freq='M',seasonal_order=(1, 1, 2, 6), trend='t', enforce_stationarity=False, enforce_invertibility=False).fit()
+        predict=arima.predict(test.index.min(),test.index.max())
         predictdata = pd.DataFrame(
             predict, index=test.index, columns=['predictprice'])
         metrics = forecast_accuracy(predictdata.values, test.values)
@@ -54,7 +52,7 @@ class ArimaUnivarient(APIView):
         actual_data = predictdata[['date', 'actual']].values.tolist()
         predicted_data = predictdata[['date', 'predictprice']].values.tolist()
 
-        return Response({'actual_data': actual_data, 'predicted_data': predicted_data, 'mape': metrics.get('mape', 0)})
+        return Response({'actual_data': actual_data, 'predicted_data': predicted_data, 'mape': metrics.get('mape', 0)*100})
 
 
 class ArimaForecast(APIView):
@@ -66,15 +64,12 @@ class ArimaForecast(APIView):
         data['date'] = pd.to_datetime(data['date'])
         data = data.drop('id', axis=1)
         data = data.set_index('date')
-        model = ARIMA(data, order=(1, 1, 1))
-        model_fit = model.fit(disp=0)
-
+        arima = SARIMAX(data, order=(1, 0, 2), freq='M', seasonal_order=(1, 2, 1, 6),
+                        enforce_stationarity=False, enforce_invertibility=False, ).fit()
         date_index = pd.date_range(start='1/1/2019', periods=n_steps, freq='M')
         data = pd.DataFrame()
-        data['prediction']  =model_fit.forecast(n_steps)[0].tolist()
+        data['prediction']  = arima.predict(date_index.min(),date_index.max())
         data['date'] = date_index
-
         data['date'] = data['date']
         predicted_data = data[['date', 'prediction']].values.tolist()
-
         return Response({'predicted_data': predicted_data})
