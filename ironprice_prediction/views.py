@@ -24,7 +24,8 @@ class CycloneClimateView(APIView):
         cyclone = []
         
         for item in queryset:
-            arr = [item['date'], item['climate']]
+            date = time.mktime(time.strptime(str(item['date']), "%Y-%m-%d"))
+            arr = [date, item['climate']]
             cyclone.append(arr)
 
         return Response({'results': cyclone})
