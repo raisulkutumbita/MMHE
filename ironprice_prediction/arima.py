@@ -28,7 +28,7 @@ class ArimaUnivarient(APIView):
 
     def get(self, request, *args, **kwargs):
         first_date = str(UnivarientData.objects.earliest('date').date)
-        last_date = str(UnivarientData.objects.latest('date').date - datetime.timedelta(days=360))
+        last_date = str(UnivarientData.objects.latest('date').date - datetime.timedelta(days=250))
 
         start_date = self.request.query_params.get('startdate', first_date)
         end_date = self.request.query_params.get('enddate', last_date)
@@ -74,7 +74,7 @@ class ArimaForecast(APIView):
     def get(self, request, *args, **kwargs):
         n_steps = int(self.request.query_params.get('nsteps', 10))
 
-        last_date = UnivarientData.objects.latest('date')
+        last_date = UnivarientData.objects.latest('date').date + datetime.timedelta(days=30)
 
         data = read_frame(UnivarientData.objects.all())
         data['date'] = pd.to_datetime(data['date'])
@@ -82,7 +82,7 @@ class ArimaForecast(APIView):
         data = data.set_index('date')
         arima = SARIMAX(data, order=(1, 0, 2), freq='M', seasonal_order=(1, 2, 1, 6),
                         enforce_stationarity=False, enforce_invertibility=False, ).fit()
-        date_index = pd.date_range(start=last_date.date, periods=n_steps, freq='M')
+        date_index = pd.date_range(start=last_date, periods=n_steps, freq='M')
         data = pd.DataFrame()
         data['prediction']  = arima.predict(date_index.min(),date_index.max())
         data['date'] = date_index
