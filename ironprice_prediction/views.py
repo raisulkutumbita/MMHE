@@ -52,8 +52,7 @@ class UnivarientDataPreview(APIView):
         results = []
         
         for item in queryset:
-            date = time.mktime(time.strptime(str(item['date']), "%Y-%m-%d"))
-            arr = [date, item['price']]
+            arr = [item['date'], item['price']]
             results.append(arr)
 
         return Response({'results': results})
