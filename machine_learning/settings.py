@@ -59,7 +59,7 @@ CORS_ORIGIN_WHITELIST = [
     "http://35.154.44.20:3003",
     "http://localhost:3003",
     "http://localhost:3000",
-    'http://13.127.144.175:3003/'
+    'http://13.127.144.175:3003'
 ]
 
 ROOT_URLCONF = 'machine_learning.urls'
