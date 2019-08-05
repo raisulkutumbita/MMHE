@@ -10,20 +10,26 @@ from .models import PriceProduction
 from dateutil import relativedelta
 
 
-class vectormodel(APIView):
-    def post(self, request, *args, **kwargs):
-        body_data = request.data
+class VectorModel(APIView):
+
+    def get(self, request, *args, **kwargs):
+        start_date = self.request.query_params.get('startdate', '1970-01-30')
+        end_date = self.request.query_params.get('enddate', '2018-01-01')
+
         data = read_frame(PriceProduction.objects.all())
         data['date'] = pd.to_datetime(data['date'])
         data = data.drop('id', axis=1)
         data = data.set_index('date')
-        startdate = dat.strptime(body_data['startdate'], '%Y-%m-%d')
-        enddate = dat.strptime(body_data['enddate'], '%Y-%m-%d')
+
+        startdate = dat.strptime(start_date, '%Y-%m-%d')
+        enddate = dat.strptime(end_date, '%Y-%m-%d')
+
         nextmonth = enddate + relativedelta.relativedelta(months=1)
         train, test = data[startdate:nextmonth], data[nextmonth:]
         model = VARMAX(train, order=(1, 1, 1))
         model_fit = model.fit(disp=False)
         yhat = model_fit.forecast(len(test)-1)
+
         yhat['actual'] = test['price']
         predictdata = yhat.drop("production", axis=1)
         metrics = forecast_accuracy(
@@ -36,10 +42,11 @@ class vectormodel(APIView):
         return Response(json)
 
 
-class VARforecast(APIView):
-    def post(self, request, *args, **kwargs):
-        body_data = request.data
-        n_steps = int(body_data['nsteps'])
+class VectorForecast(APIView):
+
+    def get(self, request, *args, **kwargs):
+        n_steps = int(self.request.query_params.get('nsteps', 10))
+        
         data = read_frame(PriceProduction.objects.all())
         data['date'] = pd.to_datetime(data['date'])
         data = data.drop('id', axis=1)

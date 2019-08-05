@@ -14,7 +14,21 @@ from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
 
-from .models import UnivarientData
+from .models import UnivarientData, CycloneData,MultivarientData
+
+
+class CycloneClimateView(APIView):
+
+    def get(self, request, *args, **kwargs):
+        queryset = CycloneData.objects.values()
+        cyclone = []
+        
+        for item in queryset:
+            date = time.mktime(time.strptime(str(item['date']), "%Y-%m-%d"))
+            arr = [date, item['climate']]
+            cyclone.append(arr)
+
+        return Response({'results': cyclone})
 
 
 class datahead(APIView):
@@ -31,6 +45,18 @@ class datahead(APIView):
         return Response(json)
 
 
+class MultivarientDataPreview(APIView):
+
+    def get(self, request, *args, **kwargs):
+        queryset = MultivarientData.objects.values()
+        results = []
+
+        for item in queryset:
+            arr = [item['date'], item['iron_price'],item['oil_price']]
+            results.append(arr)
+
+        return Response({'results': results})
+
 class UnivarientDataPreview(APIView):
 
     def get(self, request, *args, **kwargs):
@@ -38,8 +64,7 @@ class UnivarientDataPreview(APIView):
         results = []
         
         for item in queryset:
-            date = time.mktime(time.strptime(str(item['date']), "%Y-%m-%d"))
-            arr = [date, item['price']]
+            arr = [item['date'], item['price']]
             results.append(arr)
 
         return Response({'results': results})

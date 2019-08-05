@@ -56,9 +56,10 @@ MIDDLEWARE = [
 CORS_ORIGIN_WHITELIST = [
     "http://10.100.1.134:8000",
     "http://10.100.10.20:3000",
+    "http://35.154.44.20:3003",
+    "http://localhost:3003",
     "http://localhost:3000",
-    "http://localhost:3003"
-
+    'http://13.127.144.175:3003'
 ]
 
 ROOT_URLCONF = 'machine_learning.urls'
