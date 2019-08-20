@@ -14,7 +14,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
 
-from .models import UnivarientData, CycloneData
+from .models import UnivarientData, CycloneData,MultivarientData
 
 
 class CycloneClimateView(APIView):
@@ -44,6 +44,18 @@ class datahead(APIView):
         json = ast.literal_eval(json)
         return Response(json)
 
+
+class MultivarientDataPreview(APIView):
+
+    def get(self, request, *args, **kwargs):
+        queryset = MultivarientData.objects.values()
+        results = []
+
+        for item in queryset:
+            arr = [item['date'], item['iron_price'],item['oil_price']]
+            results.append(arr)
+
+        return Response({'results': results})
 
 class UnivarientDataPreview(APIView):
 

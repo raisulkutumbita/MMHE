@@ -24,3 +24,12 @@ class CycloneData(models.Model):
 
     class Meta:
         db_table = "cylone_data"
+
+
+class MultivarientData(models.Model):
+    date = models.DateField()
+    iron_price = models.FloatField(blank=True, null=True)
+    oil_price = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        db_table = "multivarient_data"
