@@ -20,6 +20,8 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView
 )
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
 
 urlpatterns = [
     path('admin', admin.site.urls),
@@ -29,3 +31,5 @@ urlpatterns = [
     path('api/v1/token/verify', TokenVerifyView.as_view(), name='token_verify'),
     path('api/v1/', include('ironprice_prediction.urls'))
 ]
+urlpatterns += staticfiles_urlpatterns()
+
