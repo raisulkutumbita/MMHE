@@ -48,14 +48,12 @@ class datahead(APIView):
 class MultivarientDataPreview(APIView):
 
     def get(self, request, *args, **kwargs):
-        queryset = MultivarientData.objects.values()
-        results = []
+        queryset = MultivarientData.objects.all()
+        oil_data = [[item.date, item.iron_price] for item in queryset]
+        iron_data = [[item.date, item.oil_price] for item in queryset]
 
-        for item in queryset:
-            arr = [item['date'], item['iron_price'],item['oil_price']]
-            results.append(arr)
+        return Response({'oil_date': oil_data, 'iron_data': iron_data})
 
-        return Response({'results': results})
 
 class UnivarientDataPreview(APIView):
 

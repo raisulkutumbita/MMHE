@@ -114,9 +114,10 @@ class ArimaMultivarientForecast(APIView):
         df['ironpriceprediction'] = arima.predict(df.index.min(), df.index.max(),
                                                   exog=df[['oilpriceprediction']])
         df['date'] = df.index
-        predicted_data = df[['date', 'ironpriceprediction',
-                             'oilpriceprediction']].values.tolist()
-        return Response({'predicted_data': predicted_data})
+        oil_data = df[['date', 'oilpriceprediction']].values.tolist()
+        iron_data = df[['date', 'ironpriceprediction']].values.tolist()
+
+        return Response({'oil_date': oil_data, 'iron_data': iron_data})
 
 
 class ArimaUnivarient(APIView):
