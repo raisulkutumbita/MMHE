@@ -52,7 +52,7 @@ class MultivarientDataPreview(APIView):
         oil_data = [[item.date, item.iron_price] for item in queryset]
         iron_data = [[item.date, item.oil_price] for item in queryset]
 
-        return Response({'oil_date': oil_data, 'iron_data': iron_data})
+        return Response({'oil_data': oil_data, 'iron_data': iron_data})
 
 
 class UnivarientDataPreview(APIView):
